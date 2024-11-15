@@ -16,16 +16,26 @@ devtools::install_github("iml-assess/gillnetTMB")
 
 # Example
 
+See example file. In short:
+
 x <- as.list(mydata)
+
 par <- defpar(x)
+
 m <- gillnetfitTMB(x,par) 
+
 m
 
 partable(m)
+
 fittable(m)
+
 seltable(m)
+
 Ntable(m)
 
 plotSel(m)
+
 plotN(m)
+
 plotRes(m)
