@@ -101,6 +101,7 @@ selmaxtable(m1)
 plotSel(m1)
 plotN(m1)
 plotRes(m1)
+plotOP(m1)
 
 ### multiple models
 x$distr <- "poisson"
@@ -123,5 +124,7 @@ plotRes(ms)
 
 plotSel(ms)
 plotN(ms)
+plotRes(ms)
+plotOP(ms)
 
 

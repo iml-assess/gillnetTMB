@@ -84,11 +84,9 @@ seltable <-function(x, ...){
 ##' @method seltable gillnet
 ##' @export
 seltable.gillnet <- function(x){
-    ret <- data.frame(do.call("cbind",x$data[1:5]),
-                      sel=x$sel,
-                      sd=x$sdrep$sd[names(x$sdrep$value)=="sel"],
-                      distr=x$data$distr,
-                      rtype=x$data$rtype)
+    ret <- data.frame(x$data)
+    ret$sel=x$sel
+    ret$sd=x$sdrep$sd[names(x$sdrep$value)=="sel"]
     return(ret)
 }
 
@@ -97,6 +95,34 @@ seltable.gillnet <- function(x){
 ##' @export
 seltable.gillnetset <- function(x){
     ret <- lapply(x,seltable)
+    ret <- combine.df(ret)
+    return(ret)
+}
+
+##' predtable
+##' @param  x...
+##' @param ... extra arguments not currently used
+##' @details ...
+##' @export
+predtable <-function(x, ...){
+    UseMethod("predtable")
+}
+
+##' @rdname predtable
+##' @method predtable gillnet
+##' @export
+predtable.gillnet <- function(x){
+    ret <- data.frame(x$data)
+    ret$pred=x$sdrep$value[names(x$sdrep$value)=="pred"]
+    ret$sd=x$sdrep$sd[names(x$sdrep$value)=="pred"]
+    return(ret)
+}
+
+##' @rdname predtable
+##' @method predtable gillnetset
+##' @export
+predtable.gillnetset <- function(x){
+    ret <- lapply(x,predtable)
     ret <- combine.df(ret)
     return(ret)
 }

@@ -56,9 +56,9 @@ plotSel <-function(x, ...){
 ##' @export
 plotSel.gillnet <- function(x,ylab="Selectivity",xlab="Length",collab="Mesh"){
     d <- seltable(x)
-    ggplot(d,aes(x=length,y=sel))+
+    ggplot(d,aes(x=length,y=sel,col=as.factor(mesh)))+
         #geom_ribbon(aes(ymin=predsel-2*predsel.sd,ymax=predsel+2*predsel,fill=as.factor(mesh)),alpha=0.5)+
-        geom_line(aes(col=as.factor(mesh)))+
+        geom_line()+
         labs(y=ylab,x=xlab,col=collab)+
         scale_color_viridis_d()
 }
@@ -93,7 +93,7 @@ plotRes <-function(x, ...){
 ##' @param ylab ylab
 ##' @param xlab xlab
 ##' @method plotRes gillnet
-##' @import ggplot2 viridis
+##' @import ggplot2
 ##' @export
 plotRes.gillnet <- function(x,xlab="Length",ylab="Mesh size"){
     d <- data.frame(residuals(x))
@@ -119,3 +119,55 @@ plotRes.gillnetset <- function(x,ylab="Selectivity",xlab="Length",collab="Mesh")
         labs(x=xlab,y=ylab)+
         facet_wrap(~fit)
 }
+
+##' plot observed vs predicted
+##' @param  x...
+##' @param ... extra arguments not currently used
+##' @details ...
+##' @import ggplot2
+##' @export
+plotOP <-function(x, ...){
+    UseMethod("plotOP")
+}
+
+##' @rdname plotOP
+##' @param ylab ylab
+##' @param xlab xlab
+##' @method plotOP gillnet
+##' @import ggplot2 viridis
+##' @export
+plotOP.gillnet <- function(x, log=FALSE,...){
+    d <- predtable(x)
+    if(log){
+        d$cpn <- log(d$cpn)
+        d$pred <- log(d$pred)
+    }
+    ggplot(d,aes(x=cpn,y=pred,col=as.factor(mesh)))+
+        geom_point()+
+        geom_abline(intercept = 0,slope=1,col="darkgrey")+
+        #theme(legend.position = "none")+
+        labs(x="Observed",y="predicted",col="Mesh")+
+        scale_color_viridis_d()
+}
+
+##' @rdname plotOP
+##' @param ylab ylab
+##' @param xlab xlab
+##' @method plotOP gillnet
+##' @import ggplot2
+##' @export
+plotOP.gillnetset <- function(x, log=FALSE,...){
+    d <- predtable(x)
+    if(log){
+        d$cpn <- log(d$cpn)
+        d$pred <- log(d$pred)
+    }
+    ggplot(d,aes(x=cpn,y=pred,col=as.factor(mesh)))+
+        geom_point()+
+        geom_abline(intercept = 0,slope=1,col="darkgrey")+
+        #theme(legend.position = "none")+
+        labs(x="Observed",y="predicted",col="Mesh")+
+        scale_color_viridis_d()+
+        facet_wrap(~fit)
+}
+
