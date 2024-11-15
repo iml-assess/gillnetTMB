@@ -129,6 +129,34 @@ Ntable.gillnetset <- function(x){
     return(ret)
 }
 
+##' selmaxtable
+##' @param  x... gillnet or gillnetset object
+##' @param ... extra arguments not currently used
+##' @details ...
+##' @export
+selmaxtable <-function(x, ...){
+    UseMethod("selmaxtable")
+}
+
+##' @rdname selmaxtable
+##' @method selmaxtable gillnet
+##' @export
+selmaxtable.gillnet <- function(x){
+    ret <- seltable(x)
+    ret <- merge(aggregate(sel ~ mesh, max, data =ret), ret[,4:6])
+    return(ret)
+}
+
+##' @rdname selmaxtable
+##' @method selmaxtable gillnetset
+##' @export
+selmaxtable.gillnetset <- function(x){
+    ret <- lapply(x,selmaxtable)
+    ret <- combine.df(ret)
+    return(ret)
+}
+
+
 
 
 
