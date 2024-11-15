@@ -5,7 +5,7 @@ Get selectivity and population index estimates, by year/period/region. Selectivi
 logObs = logN + logSel 
 
 1) 4 selectivity curves
-2) poisson or binomial distribution
+2) poisson or negative binomial distribution
 
 Based on RTMB.
 
