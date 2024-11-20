@@ -80,7 +80,7 @@ print.gillnetcoef<-function(x, ...){
 ##' @export
 residuals.gillnet<-function(object){
     ret <- do.call('cbind',object$data[1:5])
-    ret <- cbind(ret,res=sdr$value[names(sdr$value)=="res"])
+    ret <- cbind(ret,res=object$sdrep$value[names(object$sdrep$value)=="res"])
     ret
 }
 

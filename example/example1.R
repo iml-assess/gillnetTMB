@@ -1,8 +1,6 @@
 # Example 1 ####################################################################
 ## Compare Tropfish with gillnetTMB
 library(RTMB)
-library(ggplot2)
-theme_set(theme_classic())
 
 ## Data --------------------------------------------------------------------
 library(TropFishR)

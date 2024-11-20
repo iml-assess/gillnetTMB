@@ -1,10 +1,6 @@
 # Example 2 ####################################################################
 ## averaging npue across a factor (year/region/period) VERSUS using factor-specific model
 library(RTMB)
-library(ggplot2)
-theme_set(theme_classic())
-
-
 
 ## Data ------------------------------------------------------------------------
 # 1) dummy data from TropFish
@@ -24,9 +20,7 @@ dat$cpn <- pmax(round(rnorm(nrow(dat),dat$cpn,75),0),0) # add some noise to make
 p0 <- ggplot(dat,aes(x=length,y=cpn,col=as.factor(mesh)))+geom_line()+facet_wrap(~year,ncol=1)
 
 
-
 ## Option 1: take average across factor (here year) and then fit-----------------
-library(plyr)
 dat1 <- ddply(dat,c("length","mesh"),summarise,cpn=mean(cpn))
 
 x <- list(
@@ -49,13 +43,13 @@ m1
 
 sel <- seltable(m1)
 
-back <- merge(dat,sel[,-1])
+back <- merge(dat,sel[,c("length","mesh","sel","period","region")])
 back$est <- with(back,cpn/sel)
 
 p1S <- plotSel(m1)
 p1N <- ggplot(back,aes(x=length,y=est))+
     geom_bar(stat="identity",position=position_dodge())+
-    # labs(y=ylab,x=xlab,fill=filllab)+
+    labs(y="Relative abundance index",x="Length")+
     facet_wrap(year+region~period)
 
 ## Option 2: estimate in model -----------------------------------
@@ -84,6 +78,8 @@ p2S <- plotSel(m2)
 pars <- partable(c(m1,m2))
 pars[pars$par %in% c("k1","k2"),]
 
-library(gridExtra)
 grid.arrange(p1N,p2N)
 grid.arrange(p1S,p2S)
+
+
+
