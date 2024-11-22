@@ -26,16 +26,28 @@ m <- gillnetfitTMB(x,par)
 
 m
 
-partable(m)
 
-fittable(m)
+partable(m) # parameters
 
-seltable(m)
+fittable(m) # model output
 
-Ntable(m)
+seltable(m) # selectivity estimates
 
-plotSel(m)
+selmaxtable(m) # lengths at peak selectivity
 
-plotN(m)
+Ntable(m) # abundance estimates
 
-plotRes(m)
+
+plotSel(m) # plot selectivity curves
+
+plotN(m) # plot abundance
+
+plotRes(m) # plot residuals (bubbles)
+
+plotOP(m) # plot observed versus predicted
+
+# model validation
+
+1) model convergence (print m, or m$opt$convergence==0)
+2) maximum gradient <0.001 (see fittable)
+3) all parametesr have a standard error (see partable)

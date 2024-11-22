@@ -7,17 +7,19 @@
 ##' @export
 defpar <-function(x){
     Ns <- nrow(unique(do.call("cbind",x[1:4])))
+    mu <- mean(x$length/x$mesh)
+    sd <- diff(range(x$length))/(length(unique(x$mesh))-1)
     switch(x$rtype, 
            norm.loc = {
                ret <- list(
-                   k1=4,         
-                   k2=5
+                   k1=mu,         
+                   k2=sd
                )
            }, # sd = k2 
            norm.sca = {
                ret <- list(
-                   k1=4,        
-                   k2=0.1 
+                   k1=mu,        
+                   k2=(sd^2)/(mean(x$mesh)^2)
                )
            }, 
            gamma = {
@@ -37,7 +39,7 @@ defpar <-function(x){
     di <- match.arg(x$distr,c("poisson","nbinom"))
     if(di=="nbinom") ret$logtheta <- log(3)
     
-    ret$N <- rep(20,Ns) 
+    ret$N <- rep(max(x$cpn),Ns) 
     return(ret)
 }
 
@@ -59,7 +61,13 @@ gillnetfitTMB <- function(x,par){
     
     cmb <- function(f, d) function(p) f(p, d)
     obj <- MakeADFun(cmb(selTMB, x), par, silent=T)
-    opt <- nlminb(obj$par, obj$fn, obj$gr,)
+    
+    lower <- rep(0,length(obj$par))
+    upper <- rep(Inf,length(obj$par))
+    names(lower) <- names(upper) <- names(obj$par)
+    upper[which(names(upper)=='N')] <- max(x$cpn)*1.01
+    
+    opt <- nlminb(obj$par, obj$fn, obj$gr,control=list(trace=1, eval.max=2000, iter.max=1000),lower=lower,upper=upper)
     
     sdr <- sdreport(obj)
 
@@ -86,8 +94,7 @@ gillnetfitTMB <- function(x,par){
     class(ret)<-"gillnet"
     return(ret)
 }
-    
-    
+
 ##' Fit gillnet selectivity model
 ##' @param par parms
 ##' @param x data

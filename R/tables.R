@@ -169,7 +169,7 @@ selmaxtable <-function(x, ...){
 ##' @export
 selmaxtable.gillnet <- function(x){
     ret <- seltable(x)
-    ret <- merge(aggregate(sel ~ mesh, max, data =ret), ret[,4:6])
+    ret <- merge(aggregate(sel ~ mesh, max, data =ret), ret[,c("length","mesh","sel")])
     return(ret)
 }
 
