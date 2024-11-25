@@ -49,34 +49,48 @@ plotSel <-function(x, ...){
 }
 
 ##' @rdname plotSel
+##' @param x gillnet object
 ##' @param ylab ylab
 ##' @param xlab xlab
+##' @param collab color lab
+##' @param meshlabs color labels
 ##' @method plotSel gillnet
 ##' @import ggplot2 viridis
 ##' @export
-plotSel.gillnet <- function(x,ylab="Selectivity",xlab="Length",collab="Mesh"){
+plotSel.gillnet <- function(x,ylab="Selectivity",xlab="Length",collab="Mesh",meshlabs=NULL){
     d <- seltable(x)
+    m <- selmaxtable(x)
+    if(is.null(meshlabs)) meshlabs <- setNames(as.character(unique(d$mesh)), unique(d$mesh)) 
     ggplot(d,aes(x=length,y=sel,col=as.factor(mesh)))+
+        geom_vline(data=m,aes(xintercept=length),col="grey",linetype="dashed")+
         #geom_ribbon(aes(ymin=predsel-2*predsel.sd,ymax=predsel+2*predsel,fill=as.factor(mesh)),alpha=0.5)+
         geom_line()+
         labs(y=ylab,x=xlab,col=collab)+
-        scale_color_viridis_d()
+        scale_color_viridis_d(labels=meshlabs)+
+        scale_y_continuous(limits=c(0,1.05),expand=c(0,0))
 }
 
 ##' @rdname plotSel
+##' @param x gillnetset object
 ##' @param ylab ylab
 ##' @param xlab xlab
+##' @param collab color lab
+##' @param meshlabs color labels
 ##' @method plotSel gillnet
 ##' @import ggplot2
 ##' @export
-plotSel.gillnetset <- function(x,ylab="Selectivity",xlab="Length",collab="Mesh"){
+plotSel.gillnetset <- function(x,ylab="Selectivity",xlab="Length",collab="Mesh",meshlabs=NULL){
     d <- seltable(x)
+    m <- selmaxtable(x)
+    if(is.null(meshlabs)) meshlabs <- setNames(as.character(unique(d$mesh)), unique(d$mesh)) 
     ggplot(d,aes(x=length,y=sel))+
+        geom_vline(data=m,aes(xintercept=length),col="grey",linetype="dashed")+
         #geom_ribbon(aes(ymin=predsel-2*predsel.sd,ymax=predsel+2*predsel,fill=as.factor(mesh)),alpha=0.5)+
         geom_line(aes(col=as.factor(mesh)))+
         labs(y=ylab,x=xlab,col=collab)+
-        scale_color_viridis_d()+
-        facet_wrap(~fit,ncol=1)
+        scale_color_viridis_d(labels=meshlabs)+
+        facet_wrap(~fit,ncol=1)+
+        scale_y_continuous(limits=c(0,1.05),expand=c(0,0))
 }
 
 ##' plotRes
@@ -146,7 +160,7 @@ plotOP.gillnet <- function(x, log=FALSE,...){
         geom_point()+
         geom_abline(intercept = 0,slope=1,col="darkgrey")+
         #theme(legend.position = "none")+
-        labs(x="Observed",y="predicted",col="Mesh")+
+        labs(x="Observed",y="Predicted",col="Mesh")+
         scale_color_viridis_d()
 }
 
@@ -166,7 +180,7 @@ plotOP.gillnetset <- function(x, log=FALSE,...){
         geom_point()+
         geom_abline(intercept = 0,slope=1,col="darkgrey")+
         #theme(legend.position = "none")+
-        labs(x="Observed",y="predicted",col="Mesh")+
+        labs(x="Observed",y="Predicted",col="Mesh")+
         scale_color_viridis_d()+
         facet_wrap(~fit)
 }

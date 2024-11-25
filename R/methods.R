@@ -40,7 +40,7 @@ AIC.gillnet<-function(object, ...){
 ##' @details ...
 ##' @export
 AIC.gillnetset<-function(object, ...){
-    ret<- sapply(object,AIC)
+    ret<- sort(sapply(object,AIC))
     class(ret)<-"AIC"
     ret
 }
