@@ -76,7 +76,7 @@ p0 <- ggplot(mypred,aes(x=length,y=cpn))+
 rtypes <- c("norm.sca","norm.loc","lognorm",'gamma')
 dists <- c("poisson","nbinom")
 
-co <- expand.grid(rtypes,dists) # 7 and 8 don't converge yet (-Inf in nll)
+co <- expand.grid(rtypes,dists) # 7 and 8 don't converge yet (-Inf in nll; but lognorm nbinon has great starters and bounded params??)
 
 ms <- apply(co[1:6,],1, function(i){
     x$rtype <- i[1]
