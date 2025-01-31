@@ -1,45 +1,56 @@
 ##' Default parameters
 ##' @param x input data (list)
-##' @details Defaut parameters for gillnet selectivity function
+##' @details Defaut parameters for gillnet selectivity function. Based on code Surette 2016.
+##' mu initiation: In logsel = -(length-k1 x mesh)^2/(2 x k2^2), at peak selectivity (logSel=0), the equation can be solved so k1 = length/mesh.
 ##' @rdname defpar
 ##' @examples 
 ##' x <- defpar(data)
 ##' @export
 defpar <-function(x){
-    Ns <- nrow(unique(do.call("cbind",x[1:4])))
-    mu <- mean(x$length/x$mesh)
-    sd <- diff(range(x$length))/(length(unique(x$mesh))-1)
+
+    mus <- aggregate(rep(x$length, round(x$cpn)), by = list(rep(x$mesh, round(x$cpn))), mean)
+    sds <- aggregate(rep(x$length, round(x$cpn)), by = list(rep(x$mesh, round(x$cpn))), sd)
+    
     switch(x$rtype, 
            norm.loc = {
                ret <- list(
-                   k1=mu,         
-                   k2=sd
+                   k1=unname(coef(lm(mus[,2] ~ mus[,1] - 1))), # very similar to   mu <- mean(x$length/x$mesh) ,         
+                   k2=log(mean(sds[, 2]))
                )
            }, # sd = k2 
            norm.sca = {
                ret <- list(
-                   k1=mu,        
-                   k2=(sd^2)/(mean(x$mesh)^2)
+                   k1=unname(coef(lm(mus[,2] ~ mus[,1] - 1))),        
+                   k2=unname(coef(lm(sds[,2] ~ sds[,1] - 1)))
                )
            }, 
            gamma = {
+               xx <- x$length/ x$mesh
+               m <- glm(x$cpn ~ xx + log(xx), family = "poisson")
                ret <- list(
-                   k1=150,      
-                   k2=0.01
+                   k1=unname(coef(m)["log(xx)"] + 1),  # Gamma 'alpha' shape parameter.       
+                   k2=unname(-1 / coef(m)["xx"])
                )
            }, # k1 = alpha
            lognorm = {
+               mul <- mus[,2]+sds[,2]^2/2
+               sdl <- sqrt((sds[,2]^2-1)+(2*mus[,2]+sds[,2]^2))
                ret <- list(
-                   k1=4,          
-                   k2=0.1
+                   k1=unname(coef(lm(mul ~ mus[,1] - 1))),        
+                   k2=unname(coef(lm(sdl ~ sds[,1] - 1))) # if log here:0.4
                )
            } 
     )
     
     di <- match.arg(x$distr,c("poisson","nbinom"))
-    if(di=="nbinom") ret$logtheta <- log(3)
+    if(di=="nbinom") ret$logtheta <- 1
     
+    Ns <- nrow(unique(do.call("cbind",x[1:4])))
     ret$N <- rep(max(x$cpn),Ns) 
+    
+    check <- selTMB(ret,x)
+    if (is.na(check) | !is.finite(check)) warning("Default initial parameters will result in undefined likelihood.")
+
     return(ret)
 }
 
@@ -105,28 +116,24 @@ selTMB <- function(par, x) {
     
     # Selectivity curve (Millar 1997&1999)
     switch(rtype, 
-           norm.loc = {selfun <- function(length,mesh,k1,k2,...){exp(-(length-k1*mesh)^2/(2*k2^2))}}, # sd = k2 
-           norm.sca = {selfun <- function(length,mesh,k1,k2,...){exp(-(length-k1*mesh)^2/(2*k2*mesh^2))}}, # sd ~ k2*mesh, spread is scaled to mesh
-           gamma = {selfun <- function(length,mesh,k1,k2,...){((length/((k1-1)*k2*mesh))^(k1-1))*exp(k1-1-length/(k2*mesh))}}, # k1 = alpha
-           lognorm = {selfun <- function(length,mesh,k1,k2,m1,...){(1/length)*exp(k1+log(mesh/m1)-k2^2/2-((log(length)-k1-log(mesh/m1))^2)/(2*k2^2))}} #  k1 = mu, k2 = sd
+           norm.loc = {selfun <- function(length,mesh,k1,k2,...){-(length-k1*mesh)^2/(2*k2^2)}}, # mu=k1, sd = k2 
+           norm.sca = {selfun <- function(length,mesh,k1,k2,...){-(length-k1*mesh)^2/(2*k2*mesh^2)}}, # mu=k1, sd = k2*mesh, spread is scaled to mesh
+           gamma = {selfun <- function(length,mesh,k1,k2,...){(k1-1)*(log(length)-log((k1-1)*k2*mesh))+k1-1-length/(k2*mesh)}}, # k1 = alpha, k2=k (idem surette)
+           lognorm = {selfun <- function(length,mesh,k1,k2,m1,...){log(1/length)+k1+log(mesh/m1)-k2^2/2-((log(length)-k1-log(mesh/m1))^2)/(2*k2^2)}} #  k1 = mu, k2 = sd
     )
-    sel <- selfun(length,mesh,k1,k2,m1=min(mesh))
-    
-    # Prediction (can I get to logpred without all the for loops? tried with merge Nm -> didn't work)
+    logsel <- selfun(length,mesh,k1,k2,m1=min(mesh))
+
+    # Prediction
     n <- length(cpn)
     logpred <- numeric(n)
-    Nm <- cbind(unique(do.call("cbind",x[1:4])))
-
-    for(y in unique(year)){
-        for(r in unique(region)){
-            for(p in unique(period)){
-                for(m in unique(mesh)){
-                    id <- which(mesh==m & year == y & region==r & period==p)
-                    Nid <- which(Nm[,1]==y & Nm[,2]==r & Nm[,3]==p)
-                    logpred[id] <- log(N[Nid])+log(sel[id])#+log(p[Nid]) 
-                }
-            }
-        }
+    
+    d <- do.call("cbind",x[1:6])
+    dn <- unique(do.call("cbind",x[1:4]))
+    for(i in 1:n){
+        r <- d[i,]
+        id <- which(year == r[1] & region==r[2] & period==r[3] & mesh==r[5])
+        Nid <- which(dn[,1]==r[1] & dn[,2]==r[2] & dn[,3]==r[3])
+        logpred[id] <- log(N[Nid])+logsel[id]       #+log(p[Nid])
     }
 
     # likelihood
@@ -137,6 +144,7 @@ selTMB <- function(par, x) {
     )
     
     # report
+    sel <- exp(logsel)
     res <- cpn - pred
     
     ADREPORT(res)

@@ -24,7 +24,8 @@ Default parameters
 Fit gillnet selectivity model
 }
 \details{
-Defaut parameters for gillnet selectivity function
+Defaut parameters for gillnet selectivity function. Based on code Surette 2016.
+mu initiation: In logsel = -(length-k1 x mesh)^2/(2 x k2^2), at peak selectivity (logSel=0), the equation can be solved so k1 = length/mesh.
 
 Fits gillnet selecitivty model (obs = N * sel)
 }

@@ -1,15 +1,12 @@
-# Example 1 ####################################################################
-## Compare Tropfish with gillnetTMB
-library(RTMB)
-
-## Data --------------------------------------------------------------------
+# Example 1: Compare Tropfish with gillnetTMB ##################################
+library(gillnetTMB)
 library(TropFishR)
+
+## A) Baseline ######################
+
 data(gillnet)
 
-rtypes <- c("norm.sca","norm.loc","lognorm",'gamma')
-dists <- c("poisson","nbinom")
-
-## Tropfish --------------------------------------------------------------------
+### Tropfish --------------------------------------------------------------------
 dat0 <- matrix(c(gillnet$midLengths, gillnet$CatchPerNet_mat),byrow = FALSE, ncol=(dim(gillnet$CatchPerNet_mat)[2]+1))
 
 tropfits <- lapply(rtypes, function(x){
@@ -19,7 +16,7 @@ tropfits <- lapply(rtypes, function(x){
 
 names(tropfits) <- rtypes
 
-## GillnetTMB --------------------------------------------------------------------
+### GillnetTMB --------------------------------------------------------------------
 dimnames(gillnet$CatchPerNet_mat) <- list(gillnet$midLengths,gillnet$meshSizes)
 dat <- reshape2::melt(gillnet$CatchPerNet_mat,varnames = c("length","mesh"),value.name = "cpn")
 
@@ -42,54 +39,49 @@ par <- defpar(x)
 
 # fit model
 m1 <- gillnetfitTMB(x,par) # warnings if poor starting values
-m1
+m1 
+
+### Comparison -----------------------------------------------------------------
 
 partable(m1)[1:2,2:3] # estimated paras
 tropfits$norm.sca[1:2,] # how do they compare to tropfits?
 
-# Example 1b ####################################################################
-# Demo of other options
+if(!identical(round(unlist(partable(m1)[1:2,2:3],use.names=F),4),
+              round(as.vector(tropfits$norm.sca[1:2,]),4))) warning("model output not identical")
 
-## Other selectivity curves ######################
-x$rtype <- "norm.loc"
-par <- defpar(x)
-m2 <- gillnetfitTMB(x,par)
-m2
+## B) Selectivity curves #######################################################
 
-partable(m2)[1:2,2:3]
-tropfits$norm.loc[1:2,]
+# fit all selectivity curves
 
-x$rtype <- "lognorm"
-par <- defpar(x)
-m3 <- gillnetfitTMB(x,par)
-m3
+rtypes <- c("norm.sca","norm.loc","lognorm",'gamma')
+ms <- lapply(rtypes, function(i){
+    x$rtype <- i
+    par <- defpar(x)
+    gillnetfitTMB(x,par)
+})
+names(ms) <- rtypes
+ms <- do.call('c',ms) # equivalent to c(m1,m2,m3,m4)
+ms
 
-partable(m3)[1:2,2:3]
-tropfits$lognorm[1:2,]
+# % error in parameters
 
-x$rtype <- "gamma"
-par <- defpar(x)
-m4 <- gillnetfitTMB(x,par)
-m4
+aa <- round(sapply(ms,function(x)unlist(partable(x)[1:2,2:3])),4)
+bb <- round(sapply(tropfits,function(x)as.vector(x[1:2,])),4)
+(aa-bb)*100/aa
 
-partable(m4)[1:2,2:3]
-tropfits$gamma[1:2,]
-
-## Negative binomial  ######################
+## C) Distributions ####################################################################
+# Tropfish only has poisson distribution, gillnetTMB gives the choice with the negative binomial
 x$rtype <- "norm.sca"
 x$distr <- "nbinom"
 par <- defpar(x)
-m5 <- gillnetfitTMB(x,par) # warning is ok if all paras have sd, and max gradient <0.001
-m5
+m2 <- gillnetfitTMB(x,par) # warning is ok if all paras have sd, and max gradient <0.001
+m2
 
-partable(m5)[1:2,2:3]
+partable(m2)[1:2,2:3]
 
-# Example 1c ####################################################################
-# Demo of functions
+## D) DEMO of functions ########################################################
 
-## Plots and tables ------------------------------------------------------
-
-### 1 model
+### 1 model --------------------------------------------------------------------
 fittable(m1)
 partable(m1)
 seltable(m1)
@@ -101,17 +93,7 @@ plotN(m1)
 plotRes(m1)
 plotOP(m1)
 
-### multiple models
-x$distr <- "poisson"
-ms <- lapply(rtypes, function(i){
-    x$rtype <- i
-    par <- defpar(x)
-    gillnetfitTMB(x,par)
-})
-names(ms) <- rtypes
-ms <- do.call('c',ms) # equivalent to c(m1,m2,m3,m4)
-ms
-
+### multiple models  -----------------------------------------------------------
 fittable(ms)
 AIC(ms)
 partable(ms)
@@ -124,5 +106,6 @@ plotSel(ms)
 plotN(ms)
 plotRes(ms)
 plotOP(ms)
+
 
 

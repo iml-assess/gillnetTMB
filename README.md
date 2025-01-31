@@ -1,53 +1,55 @@
 # GillnetTMB
 
-Get selectivity and population index estimates, by year/period/region. Selectivity is assumed constant over space and time.
+Model to estimate gear selectivity and population abundance by factor (year/period/region). Selectivity is assumed constant over space and time.
 
-logObs = logN + logSel 
+The model follows;
 
-1) 4 selectivity curves
-2) poisson or negative binomial distribution
+logPred(mlf) = logN(lf) + logSel(l) (based on Surette et al. 2016),
 
-Based on RTMB.
+where logPred(mlg) is the predicted mean for mesh size m and fish length l, for factor f. logN is the estimated population abundance corrected for selectivity, on a log scale. logSel is time time- and space invariant gear selectivity at length. The package has four types of selectivity curves (see Millar 1997 and 1999). Two count distributions can be used; the Poisson and the negative binomial. Note that each mesh size is assumed to have equal power (i.e., their relative fishing power  is one).
+
+The model is based on RTMB. 
 
 # Installation
 
-Currently not packaged (just Rproject)
 devtools::install_github("iml-assess/gillnetTMB")
+
+The package requires installation of Rtools.
 
 # Example
 
-See example file. In short:
+See example files. In short:
 
+```
 x <- as.list(mydata)
-
 par <- defpar(x)
-
 m <- gillnetfitTMB(x,par) 
-
 m
+```
 
+Tables and plots (including generic methods such as AIC, logLik, coef):
+```
+fittable(m)
+partable(m)
+AIC(m)
+seltable(m)
+Ntable(m)
+selmaxtable(m)
 
-partable(m) # parameters
+plotSel(m)
+plotN(m)
+plotRes(m)
+plotOP(m)
+```
 
-fittable(m) # model output
-
-seltable(m) # selectivity estimates
-
-selmaxtable(m) # lengths at peak selectivity
-
-Ntable(m) # abundance estimates
-
-
-plotSel(m) # plot selectivity curves
-
-plotN(m) # plot abundance
-
-plotRes(m) # plot residuals (bubbles)
-
-plotOP(m) # plot observed versus predicted
-
-# model validation
+# Model validation
 
 1) model convergence (print m, or m$opt$convergence==0)
 2) maximum gradient <0.001 (see fittable)
 3) all parametesr have a standard error (see partable)
+
+# References
+
+1. Millar, R., 1997. Estimation of gillnet and hook selectivity using log-linear models. ICES J. Mar. Sci. 54, 471–477. https://doi.org/10.1006/jmsc.1996.0196
+2. Millar, R.B., Freyer, R.J., 1999. Estimating the size-selection curves of towed gears, traps, nets and hooks. Rev. Fish Biol. Fish. 9, 89–116. https://doi.org/https://doi.org/10.1023/A:1008838220001
+3. Surette, T.., LeBlanc, C.., Mallet, A., 2016. Abundance indices and selectivity curves from experimental multi-panel gillnets for the southern Gulf of St. Lawrence fall herring fishery. Can. Sci. Advis. Secr. Res. Doc. 067, vi + 23 p.

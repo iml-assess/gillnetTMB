@@ -61,12 +61,13 @@ plotSel.gillnet <- function(x,ylab="Selectivity",xlab="Length",collab="Mesh",mes
     d <- seltable(x)
     m <- selmaxtable(x)
     if(is.null(meshlabs)) meshlabs <- setNames(as.character(unique(d$mesh)), unique(d$mesh)) 
-    ggplot(d,aes(x=length,y=sel,col=as.factor(mesh)))+
+    ggplot(d,aes(x=length,y=sel))+
         geom_vline(data=m,aes(xintercept=length),col="grey",linetype="dashed")+
-        #geom_ribbon(aes(ymin=predsel-2*predsel.sd,ymax=predsel+2*predsel,fill=as.factor(mesh)),alpha=0.5)+
-        geom_line()+
-        labs(y=ylab,x=xlab,col=collab)+
+        geom_ribbon(aes(ymin=sel-1.96*sd,ymax=sel+1.96*sd,fill=as.factor(mesh)),alpha=0.5)+
+        geom_line(aes(col=as.factor(mesh)))+
+        labs(y=ylab,x=xlab,col=collab,fill=collab)+
         scale_color_viridis_d(labels=meshlabs)+
+        scale_fill_viridis_d(labels=meshlabs)+
         scale_y_continuous(limits=c(0,1.05),expand=c(0,0))
 }
 
@@ -115,7 +116,8 @@ plotRes.gillnet <- function(x,xlab="Length",ylab="Mesh size"){
     ggplot(d,aes(x=length,y=as.factor(mesh),size=res^2,col=sign))+
         geom_point()+
         #theme(legend.position = "none")+
-        labs(x=xlab,y=ylab)
+        labs(x=xlab,y=ylab)+
+        facet_wrap(year+region~period)
 }
 
 ##' @rdname plotRes
