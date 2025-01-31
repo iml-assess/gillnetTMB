@@ -1,10 +1,11 @@
-# Example 2 ####################################################################
-## averaging npue across a factor (year/region/period) VERSUS using factor-specific model
-library(RTMB)
+# Example 2: addition of groups #################################################
+# -> averaging npue across a factor (year/region/period) VERSUS using factor-specific model
 
-## Data ------------------------------------------------------------------------
-# 1) dummy data from TropFish
+library(gillnetTMB)
 library(TropFishR)
+
+### A) Data --------------------------------------------------------------------
+# 1) get demo data from TropFish
 data(gillnet)
 dimnames(gillnet$CatchPerNet_mat) <- list(gillnet$midLengths,gillnet$meshSizes)
 dat0 <- reshape2::melt(gillnet$CatchPerNet_mat,varnames = c("length","mesh"),value.name = "cpn")
@@ -20,7 +21,7 @@ dat$cpn <- pmax(round(rnorm(nrow(dat),dat$cpn,75),0),0) # add some noise to make
 p0 <- ggplot(dat,aes(x=length,y=cpn,col=as.factor(mesh)))+geom_line()+facet_wrap(~year,ncol=1)
 
 
-## Option 1: take average across factor (here year) and then fit-----------------
+### B) Option 1: average across factor (here year) and then fit-----------------
 dat1 <- ddply(dat,c("length","mesh"),summarise,cpn=mean(cpn))
 
 x <- list(
@@ -41,6 +42,7 @@ par <- defpar(x)
 m1 <- gillnetfitTMB(x,par)
 m1
 
+# apply estimated selectivity to observed regional abundances
 sel <- seltable(m1)
 
 back <- merge(dat,sel[,c("length","mesh","sel","period","region")])
@@ -52,7 +54,7 @@ p1N <- ggplot(back,aes(x=length,y=est))+
     labs(y="Relative abundance index",x="Length")+
     facet_wrap(year+region~period)
 
-## Option 2: estimate in model -----------------------------------
+### C) Option 2: estimate by factor in model ---------------------------------------------
 x <- list(
     year = dat$year,
     region = rep(1,nrow(dat)),
