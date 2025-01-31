@@ -12,7 +12,9 @@ The model is based on RTMB.
 
 # Installation
 
+```
 devtools::install_github("iml-assess/gillnetTMB")
+```
 
 The package requires installation of Rtools.
 
