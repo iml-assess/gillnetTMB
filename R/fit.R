@@ -45,8 +45,8 @@ defpar <-function(x){
     di <- match.arg(x$distr,c("poisson","nbinom"))
     if(di=="nbinom") ret$logtheta <- 1
     
-    Ns <- nrow(unique(do.call("cbind",x[1:4])))
-    ret$N <- rep(max(x$cpn),Ns) 
+    temp <- aggregate(list(Ninit = x$cpn), by = x[1:4], mean)
+    ret$N <- temp[,"Ninit"]
     
     check <- selTMB(ret,x)
     if (is.na(check) | !is.finite(check)) warning("Default initial parameters will result in undefined likelihood.")
