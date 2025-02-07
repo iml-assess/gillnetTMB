@@ -11,16 +11,18 @@ plotN <-function(x, ...){
 ##' @rdname plotN
 ##' @param ylab ylab
 ##' @param xlab xlab
+##' @param ci logical
 ##' @method plotN gillnet
 ##' @import ggplot2
 ##' @export
-plotN.gillnet <- function(x,ylab="Relative abundance index",xlab="Length"){
+plotN.gillnet <- function(x,ylab="Relative abundance index",xlab="Length",ci=TRUE){
     d <- Ntable(x)
-    ggplot(d,aes(x=length,y=estimate))+
+    p <- ggplot(d,aes(x=length,y=estimate))+
         geom_bar(stat="identity")+
-        geom_errorbar(aes(ymin=low,ymax=high),width=0.2)+
         labs(y=ylab,x=xlab)+
         facet_wrap(year+region~period)
+    if(ci) p <- p+geom_errorbar(aes(ymin=low,ymax=high),width=0.2)
+    return(p)
 }
 
 ##' @rdname plotN
@@ -29,13 +31,14 @@ plotN.gillnet <- function(x,ylab="Relative abundance index",xlab="Length"){
 ##' @method plotN gillnet
 ##' @import ggplot2
 ##' @export
-plotN.gillnetset <- function(x,ylab="Relative abundance index",xlab="Length",filllab="Fit",dodge=1.8){
+plotN.gillnetset <- function(x,ylab="Relative abundance index",xlab="Length",ci=TRUE,collab="Fit",dodge=1.8){
     d <- Ntable(x)
-    ggplot(d,aes(x=length,y=estimate,fill=as.factor(fit),ymin=low,ymax=high))+
+    p <- ggplot(d,aes(x=length,y=estimate,fill=as.factor(fit),ymin=low,ymax=high))+
         geom_bar(stat="identity",aes(fill=as.factor(fit)),position=position_dodge())+
-        geom_errorbar(width=0.2,position=position_dodge(dodge))+
-        labs(y=ylab,x=xlab,fill=filllab)+
+        labs(y=ylab,x=xlab,fill=collab)+
         facet_wrap(year+region~period)
+    if(ci) p <- p+geom_errorbar(width=0.2,position=position_dodge(dodge))
+    return(p)
 }
 
 ##' plotSel
@@ -88,7 +91,7 @@ plotSel.gillnetset <- function(x,ylab="Selectivity",xlab="Length",collab="Mesh",
         geom_vline(data=m,aes(xintercept=length),col="grey",linetype="dashed")+
         geom_ribbon(aes(ymin=low,ymax=high,fill=as.factor(mesh)),alpha=0.5)+
         geom_line(aes(col=as.factor(mesh)))+
-        labs(y=ylab,x=xlab,col=collab)+
+        labs(y=ylab,x=xlab,col=collab,fill=collab)+
         scale_color_viridis_d(labels=meshlabs)+
         scale_fill_viridis_d(labels=meshlabs)+
         facet_wrap(~fit,ncol=1)+
