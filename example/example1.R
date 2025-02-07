@@ -1,10 +1,12 @@
 # Example 1: Compare Tropfish with gillnetTMB ##################################
-library(gillnetTMB)
+#library(gillnetTMB)
 library(TropFishR)
+library(RTMB)
 
 ## A) Baseline ######################
 
 data(gillnet)
+rtypes <- c("norm.sca","norm.loc","lognorm",'gamma')
 
 ### Tropfish --------------------------------------------------------------------
 dat0 <- matrix(c(gillnet$midLengths, gillnet$CatchPerNet_mat),byrow = FALSE, ncol=(dim(gillnet$CatchPerNet_mat)[2]+1))
@@ -53,7 +55,6 @@ if(!identical(round(unlist(partable(m1)[1:2,2:3],use.names=F),4),
 
 # fit all selectivity curves
 
-rtypes <- c("norm.sca","norm.loc","lognorm",'gamma')
 ms <- lapply(rtypes, function(i){
     x$rtype <- i
     par <- defpar(x)
@@ -100,7 +101,6 @@ partable(ms)
 Ntable(ms)
 seltable(ms)
 selmaxtable(ms)
-plotRes(ms)
 
 plotSel(ms)
 plotN(ms)

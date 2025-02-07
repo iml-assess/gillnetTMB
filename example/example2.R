@@ -1,7 +1,7 @@
 # Example 2: addition of groups #################################################
 # -> averaging npue across a factor (year/region/period) VERSUS using factor-specific model
 
-library(gillnetTMB)
+#library(gillnetTMB)
 library(TropFishR)
 
 ### A) Data --------------------------------------------------------------------
@@ -22,7 +22,7 @@ p0 <- ggplot(dat,aes(x=length,y=cpn,col=as.factor(mesh)))+geom_line()+facet_wrap
 
 
 ### B) Option 1: average across factor (here year) and then fit-----------------
-dat1 <- ddply(dat,c("length","mesh"),summarise,cpn=mean(cpn))
+dat1 <- ddply(dat,c("length","mesh"),summarise,cpn=round(mean(cpn),0))
 
 x <- list(
     year = rep(1,nrow(dat1)),
@@ -45,8 +45,8 @@ m1
 # apply estimated selectivity to observed regional abundances
 sel <- seltable(m1)
 
-back <- merge(dat,sel[,c("length","mesh","sel","period","region")])
-back$est <- with(back,cpn/sel)
+back <- merge(dat,sel[,c("length","mesh","estimate","period","region")])
+back$est <- with(back,cpn/estimate)
 
 p1S <- plotSel(m1)
 p1N <- ggplot(back,aes(x=length,y=est))+

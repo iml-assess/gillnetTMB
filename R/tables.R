@@ -84,9 +84,14 @@ seltable <-function(x, ...){
 ##' @method seltable gillnet
 ##' @export
 seltable.gillnet <- function(x){
-    ret <- data.frame(x$data)
-    ret$sel=x$sel
-    ret$sd=x$sdrep$sd[names(x$sdrep$value)=="sel"]
+    sdr <- x$sdrep
+    id <- names(sdr$value)=="logsel"
+    logp <- sdr$value[id]
+    logpsd <- sdr$sd[id]
+    logp <- cbind(logp,logp+logpsd%o%c(-1.96,1.96))
+    colnames(logp)<-c("estimate","low","high")
+    ret <- data.frame(cbind(do.call("cbind",x$data[1:6]),exp(logp)))
+    rownames(ret) <- 1:nrow(ret)
     return(ret)
 }
 
@@ -112,9 +117,14 @@ predtable <-function(x, ...){
 ##' @method predtable gillnet
 ##' @export
 predtable.gillnet <- function(x){
-    ret <- data.frame(x$data)
-    ret$pred=x$sdrep$value[names(x$sdrep$value)=="pred"]
-    ret$sd=x$sdrep$sd[names(x$sdrep$value)=="pred"]
+    sdr <- x$sdrep
+    id <- names(sdr$value)=="logpred"
+    logp <- sdr$value[id]
+    logpsd <- sdr$sd[id]
+    logp <- cbind(logp,logp+logpsd%o%c(-1.96,1.96))
+    colnames(logp)<-c("estimate","low","high")
+    ret <- data.frame(cbind(do.call("cbind",x$data[1:6]),exp(logp)))
+    rownames(ret) <- 1:nrow(ret)
     return(ret)
 }
 
@@ -140,7 +150,14 @@ Ntable <-function(x, ...){
 ##' @method Ntable gillnet
 ##' @export
 Ntable.gillnet <- function(x){
-    ret <- x$N
+    sdr <- x$sdrep
+    idN <- which(colnames(sdr$cov.fixed)=="logN")
+    logN <- sdr$par.fixed[idN]
+    logNsd <- sqrt(diag(sdr$cov.fixed[idN,idN]))
+    logN <- cbind(logN,logN+logNsd%o%c(-1.96,1.96))
+    colnames(logN)<-c("estimate","low","high")
+    ret <- data.frame(cbind(unique(do.call("cbind",x$data[1:4])),exp(logN)))
+    rownames(ret) <- 1:nrow(ret)
     ret$distr <- x$data$distr
     ret$rtype <- x$data$rtype
     return(ret)
@@ -169,7 +186,7 @@ selmaxtable <-function(x, ...){
 ##' @export
 selmaxtable.gillnet <- function(x){
     ret <- seltable(x)
-    ret <- merge(aggregate(sel ~ mesh, max, data =ret), ret[,c("length","mesh","sel")])
+    ret <- merge(aggregate(estimate ~ mesh, max, data = ret), ret[,c("length","mesh","estimate")])
     return(ret)
 }
 

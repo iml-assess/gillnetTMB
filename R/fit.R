@@ -46,7 +46,8 @@ defpar <-function(x){
     if(di=="nbinom") ret$logtheta <- 1
     
     temp <- aggregate(list(Ninit = x$cpn), by = x[1:4], mean)
-    ret$N <- temp[,"Ninit"]
+    temp$Ninit[temp$Ninit==0] <- min(temp$Ninit[temp$Ninit!=0])
+    ret$logN <- log(temp[,"Ninit"])
     
     check <- selTMB(ret,x)
     if (is.na(check) | !is.finite(check)) warning("Default initial parameters will result in undefined likelihood.")
@@ -68,8 +69,6 @@ gillnetfitTMB <- function(x,par){
     x$rtype <- match.arg(x$rtype,c("norm.sca","norm.loc","gamma","lognorm"))
     x$distr <- match.arg(x$distr,c("poisson","nbinom"))
     
-    xx <- unique(do.call("cbind",x[1:4]))
-    
     cmb <- function(f, d) function(p) f(p, d)
     obj <- MakeADFun(cmb(selTMB, x), par, silent=T)
     
@@ -82,15 +81,7 @@ gillnetfitTMB <- function(x,par){
     
     sdr <- sdreport(obj)
 
-    sel <- sdr$value[names(sdr$value)=="sel"]
-    
-    idN <- which(colnames(sdr$cov.fixed)=="N")
-    Ncov <- sdr$cov.fixed[idN,idN]
-    Nest <- data.frame(xx, est=sdr$par.fixed[idN],sd=sqrt(diag(Ncov)))
-
-    ret <- list(sel = sel, 
-                N = Nest, 
-                conv = opt$message, 
+    ret <- list(conv = opt$message, 
                 nll = opt$objective, 
                 df = length(opt$par), 
                 AIC = 2*length(opt$par)-2*opt$objective, 
@@ -131,9 +122,8 @@ selTMB <- function(par, x) {
     dn <- unique(do.call("cbind",x[1:4]))
     for(i in 1:n){
         r <- d[i,]
-        id <- which(year == r[1] & region==r[2] & period==r[3] & mesh==r[5])
-        Nid <- which(dn[,1]==r[1] & dn[,2]==r[2] & dn[,3]==r[3])
-        logpred[id] <- log(N[Nid])+logsel[id]       #+log(p[Nid])
+        Nid <- which(dn[,1]==r[1] & dn[,2]==r[2] & dn[,3]==r[3] & dn[,4]==r[4])
+        logpred[i] <- logN[Nid]+logsel[i]       #+log(p[Nid])
     }
 
     # likelihood
@@ -144,12 +134,11 @@ selTMB <- function(par, x) {
     )
     
     # report
-    sel <- exp(logsel)
     res <- cpn - pred
-    
+
+    ADREPORT(logpred)
     ADREPORT(res)
-    ADREPORT(sel)
-    ADREPORT(pred)
+    ADREPORT(logsel)
     
     # return
     -sum(nll)
