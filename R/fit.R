@@ -69,6 +69,15 @@ gillnetfitTMB <- function(x,par){
     x$rtype <- match.arg(x$rtype,c("norm.sca","norm.loc","gamma","lognorm"))
     x$distr <- match.arg(x$distr,c("poisson","nbinom"))
     
+    group <- apply(do.call("cbind",x[1:4]),1,paste,collapse=".")
+    group <- as.numeric(as.factor(group))
+    temp <- aggregate(x$cpn, by = list(group), sum)
+    ix <- temp[,2][group]==0
+    if(any(ix)){
+        print(paste("Removed", length(ix[ix]), "observations with zero counts for all mesh sizes, per group.") )
+        x[1:6] <- lapply(x[1:6],function(i)i[!ix])
+    }
+    
     cmb <- function(f, d) function(p) f(p, d)
     obj <- MakeADFun(cmb(selTMB, x), par, silent=T)
     
