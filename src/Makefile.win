@@ -1,0 +1,7 @@
+all: gillnetTMB.dll
+
+gillnetTMB.dll: gillnetTMB.cpp
+	Rscript --vanilla -e "TMB::compile('gillnetTMB.cpp', '-O1 -g',DLLFLAGS='')"
+
+clean:
+	rm -rf *.dll

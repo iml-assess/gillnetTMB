@@ -1,6 +1,6 @@
-# Example 3 ####################################################################
+# Example 3: real data (herring) ###############################################
 # 4R herring data (not as perfect)
-library(RTMB)
+library(gillnetTMB)
 
 ## 1) data ---------------------------------------------------------------------
 load("Rdata/input.Rdata",verbose = T)
@@ -10,7 +10,7 @@ x$mesh <- x$mesh*2.54     # make sure mesh sizes are in cm, numeric vector
 x$length <- x$length/10   # lengths are equally in cm
 x$cpn <- round(x$cpn*100,0)   # catches are treated as "counts". FAILS if all values <1!!!
 
-# pad with zeros (which are ALSO observations)
+# pad with zeros (which are ALSO observations; zeros for all years/period/gear/mesh will get removed)
 l <- data.frame(x)
 dat <- dcast(l,length~mesh,value.var = "cpn",fill = 0)
 dat <- melt(dat,id.vars = "length",variable.name = "mesh",value.name = "cpn")
@@ -27,7 +27,7 @@ x <- list(
     period = rep(1,nrow(dat)),
     length = as.numeric(as.character(dat$length)),
     mesh = as.numeric(as.character(dat$mesh)),
-    cpn =as.numeric(as.character(dat$cpn))*100,
+    cpn =as.numeric(as.character(dat$cpn)),
     rtype="norm.sca",
     distr = "poisson"         # poisson or nbinom
 )
@@ -39,7 +39,7 @@ par <- defpar(x)
 par
 
 # run model
-m1 <- gillnetfitTMB(x,par) # 12 and 10 converges, but flat selectivity
+m1 <- gillnetfit(x,par) # 12 and 10 converges, but flat selectivity
 m1
 
 ## 3) check output ---------------------------------------------------------------------
@@ -67,9 +67,10 @@ plotOP(m1)
 mypred <- seltable(m1)
 mypred <- merge(mypred,meshconv)
 mypred$mesh.lab <- factor(mypred$mesh.lab,levels=unique(meshconv$mesh.lab))
+mypred$cpn <- defdat(x)[["cpn"]]
 p0 <- ggplot(mypred,aes(x=length,y=cpn))+
     geom_bar(stat='identity')+
-    geom_line(aes(y=sel*max(cpn)),col="darkred")+ #selectivity rescaled to max cpn
+    geom_line(aes(y=estimate*max(cpn)),col="darkred")+ #selectivity rescaled to max cpn
     facet_grid(mesh.lab~.)
     
 ## 4) fit (scattergun) ---------------------------------------------------------------------
@@ -82,7 +83,7 @@ ms <- apply(co[1:6,],1, function(i){
     x$rtype <- i[1]
     x$distr <- i[2]
     par <- defpar(x)
-    gillnetfitTMB(x,par)
+    gillnetfit(x,par)
 })
 names(ms) <- do.call(paste, c(co[1:6,], sep=" - "))
 
@@ -100,7 +101,8 @@ plotOP(ms)
 mypred <- seltable(ms)
 mypred <- merge(mypred,meshconv)
 mypred$mesh.lab <- factor(mypred$mesh.lab,levels=unique(meshconv$mesh.lab))
+mypred$cpn <- defdat(x)[["cpn"]]
 p0 <- ggplot(mypred[mypred$fit==names(AIC(ms))[1],],aes(x=length,y=cpn))+
     geom_bar(stat='identity')+
-    geom_line(data=mypred,aes(y=sel*max(cpn),col=fit))+ #selectivity rescaled to max cpn
+    geom_line(data=mypred,aes(y=estimate*max(cpn),col=fit))+ #selectivity rescaled to max cpn
     facet_grid(mesh.lab~.)

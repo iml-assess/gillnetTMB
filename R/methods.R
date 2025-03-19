@@ -79,8 +79,8 @@ print.gillnetcoef<-function(x, ...){
 ##' @details ...
 ##' @export
 residuals.gillnet<-function(object){
-    ret <- do.call('cbind',object$data[1:5])
-    ret <- cbind(ret,res=object$sdrep$value[names(object$sdrep$value)=="res"])
+    ret <- predtable(object)
+    ret$res <- with(ret,cpn-estimate)
     ret
 }
 
@@ -91,7 +91,7 @@ residuals.gillnet<-function(object){
 ##' @details ...
 ##' @export
 residuals.gillnetset<-function(object){
-    ret <- lapply(object,function(x) data.frame(residuals(x)))
+    ret <- lapply(object,function(x) residuals(x))
     ret <- combine.df(ret)
     return(ret)
 }
