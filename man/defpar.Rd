@@ -2,32 +2,21 @@
 % Please edit documentation in R/fit.R
 \name{defpar}
 \alias{defpar}
-\alias{gillnetfitTMB}
 \title{Default parameters}
 \usage{
-defpar(x)
-
-gillnetfitTMB(x, par)
+defpar(x, plot = FALSE)
 }
 \arguments{
-\item{x}{input data (list). mesh needs to be in increasing order.}
+\item{x}{input data (list)}
 
-\item{par}{start parameters (list)}
-
-\item{rtype}{type}
-
-\item{distr}{distribution (poisson or dnbinom)}
+\item{plot}{plot selectivity curves at inital parameter estimates.}
 }
 \description{
 Default parameters
-
-Fit gillnet selectivity model
 }
 \details{
 Defaut parameters for gillnet selectivity function. Based on code Surette 2016.
 mu initiation: In logsel = -(length-k1 x mesh)^2/(2 x k2^2), at peak selectivity (logSel=0), the equation can be solved so k1 = length/mesh.
-
-Fits gillnet selecitivty model (obs = N * sel)
 }
 \examples{
 x <- defpar(data)

@@ -7,6 +7,15 @@ combine.df <- function(x){
     do.call(rbind, lapply(n, function(name) {cbind(fit = name, x[[name]])}))
 } 
 
+##' group.key
+##' @param  x input data
+##' @details get data.frame with year/region/period/group id. 
+group.key <- function(x){
+    y <- do.call("cbind",x[1:3])
+    group <- as.numeric(as.factor(apply(y,1,paste,collapse=".")))
+    unique(data.frame(y,group=group))
+}
+
 ##' fittable
 ##' @param  x...
 ##' @param ... extra arguments not currently used
@@ -90,7 +99,9 @@ seltable.gillnet <- function(x){
     logpsd <- sdr$sd[id]
     logp <- cbind(logp,logp+logpsd%o%c(-1.96,1.96))
     colnames(logp)<-c("estimate","low","high")
-    ret <- data.frame(cbind(do.call("cbind",x$data[1:6]),exp(logp)))
+    xx <-defdat(x$data)
+    ret <- data.frame(length=xx$length,mesh=xx$mesh,exp(logp),group=xx$group)
+    ret <- merge(ret,group.key(x$data))
     rownames(ret) <- 1:nrow(ret)
     return(ret)
 }
@@ -123,7 +134,9 @@ predtable.gillnet <- function(x){
     logpsd <- sdr$sd[id]
     logp <- cbind(logp,logp+logpsd%o%c(-1.96,1.96))
     colnames(logp)<-c("estimate","low","high")
-    ret <- data.frame(cbind(do.call("cbind",x$data[1:6]),exp(logp)))
+    xx <- defdat(x$data)
+    ret <- data.frame(group=xx$group,length=xx$length,mesh=xx$mesh,cpn=xx$cpn,exp(logp))
+    ret <- merge(ret,group.key(x$data))
     rownames(ret) <- 1:nrow(ret)
     return(ret)
 }
@@ -156,7 +169,8 @@ Ntable.gillnet <- function(x){
     logNsd <- sqrt(diag(sdr$cov.fixed[idN,idN]))
     logN <- cbind(logN,logN+logNsd%o%c(-1.96,1.96))
     colnames(logN)<-c("estimate","low","high")
-    ret <- data.frame(cbind(unique(do.call("cbind",x$data[1:4])),exp(logN)))
+    ret <- data.frame(melt(x$para$logN)[,-3],exp(logN))
+    ret <- merge(ret,group.key(x$data))
     rownames(ret) <- 1:nrow(ret)
     ret$distr <- x$data$distr
     ret$rtype <- x$data$rtype

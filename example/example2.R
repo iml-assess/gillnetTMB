@@ -1,7 +1,7 @@
 # Example 2: addition of groups #################################################
 # -> averaging npue across a factor (year/region/period) VERSUS using factor-specific model
 
-#library(gillnetTMB)
+library(gillnetTMB)
 library(TropFishR)
 
 ### A) Data --------------------------------------------------------------------
@@ -39,7 +39,7 @@ x <- list(
 par <- defpar(x)
 
 # fit model
-m1 <- gillnetfitTMB(x,par)
+m1 <- gillnetfit(x,par)
 m1
 
 # apply estimated selectivity to observed regional abundances
@@ -70,7 +70,7 @@ x <- list(
 par <- defpar(x)
 
 # fit model
-m2 <- gillnetfitTMB(x,par) # warnings if poor starting values
+m2 <- gillnetfit(x,par) # warnings if poor starting values
 m2
 
 p2N <- plotN(m2)
@@ -78,7 +78,7 @@ p2S <- plotSel(m2)
 
 ## Compare -----------------------------------
 pars <- partable(c(m1,m2))
-pars[pars$par %in% c("k1","k2"),]
+pars[pars$par %in% c("par"),]
 
 grid.arrange(p1N,p2N)
 grid.arrange(p1S,p2S)

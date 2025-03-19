@@ -1,16 +1,15 @@
 Package: gillnetTMB
-Title: Gillnet selectivity (using RTMB)
-Version: 0.1.0
-Date: 2024-11-15
+Title: Gillnet selectivity (using TMB)
+Version: 0.2.0
+Date: 2025-03-19
 Authors@R: c(person("Elisabeth",
                     "Van Beveren",
                     role=c("aut","cre"),
                     email="Elisabeth.vanbeveren@dfo-mpo.gc.ca"))
 Description: Gillnet selectivity
-LinkingTo: RcppEigen
+LinkingTo: RcppEigen, TMB
 License: GPL-2
-Imports: TropFishR, RTMB
+Imports: TMB, ggplot2, viridis, reshape2
 Encoding: UTF-8
-LazyData: TRUE
 RoxygenNote: 7.2.3
-Depends: RTMB, RcppEigen, R (>= 2.10)
+Depends: TMB, RcppEigen, R (>= 2.10)

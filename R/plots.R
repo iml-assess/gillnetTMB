@@ -115,7 +115,7 @@ plotRes <-function(x, ...){
 ##' @import ggplot2
 ##' @export
 plotRes.gillnet <- function(x,xlab="Length",ylab="Mesh size"){
-    d <- data.frame(residuals(x))
+    d <- residuals(x)
     d$sign <- ifelse(d$res<0,"-","+")
     ggplot(d,aes(x=length,y=as.factor(mesh),size=res^2,col=sign))+
         geom_point()+
@@ -131,7 +131,7 @@ plotRes.gillnet <- function(x,xlab="Length",ylab="Mesh size"){
 ##' @import ggplot2
 ##' @export
 plotRes.gillnetset <- function(x,ylab="Selectivity",xlab="Length",collab="Mesh"){
-    d <- data.frame(residuals(x))
+    d <- residuals(x)
     d$sign <- ifelse(d$res<0,"-","+")
     ggplot(d,aes(x=length,y=as.factor(mesh),size=res^2,col=sign))+
         geom_point()+
@@ -160,7 +160,7 @@ plotOP.gillnet <- function(x, log=FALSE,...){
     d <- predtable(x)
     if(log){
         d$cpn <- log(d$cpn)
-        d$pred <- log(d$pred)
+        d$estimate <- log(d$estimate)
     }
     ggplot(d,aes(x=cpn,y=estimate,col=as.factor(mesh)))+
         geom_point()+

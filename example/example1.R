@@ -1,7 +1,6 @@
 # Example 1: Compare Tropfish with gillnetTMB ##################################
-#library(gillnetTMB)
+library(gillnetTMB)
 library(TropFishR)
-library(RTMB)
 
 ## A) Baseline ######################
 
@@ -10,17 +9,20 @@ rtypes <- c("norm.sca","norm.loc","lognorm",'gamma')
 
 ### Tropfish --------------------------------------------------------------------
 dat0 <- matrix(c(gillnet$midLengths, gillnet$CatchPerNet_mat),byrow = FALSE, ncol=(dim(gillnet$CatchPerNet_mat)[2]+1))
+add <- cbind(seq(74.5,80.5,by=2),matrix(0,nrow=4,ncol=8))
+dat0 <- rbind(dat0,add)
 
 tropfits <- lapply(rtypes, function(x){
-    g <- gillnetfit(data = dat0, meshsizes = gillnet$meshSizes,rtype=x,details=TRUE) 
+    g <- TropFishR::gillnetfit(data = dat0, meshsizes = gillnet$meshSizes,rtype=x,details=TRUE) 
     g$gear.pars
 })
 
 names(tropfits) <- rtypes
 
 ### GillnetTMB --------------------------------------------------------------------
-dimnames(gillnet$CatchPerNet_mat) <- list(gillnet$midLengths,gillnet$meshSizes)
-dat <- reshape2::melt(gillnet$CatchPerNet_mat,varnames = c("length","mesh"),value.name = "cpn")
+d <- dat0[,-1]
+dimnames(d) <- list("length"= dat0[,1],"mesh" = gillnet$meshSizes)
+dat <- reshape2::melt(d,value.name = "cpn")
 
 p0 <- ggplot(dat,aes(x=length,y=cpn,col=as.factor(mesh)))+geom_line()
 
@@ -40,16 +42,13 @@ x <- list(
 par <- defpar(x)
 
 # fit model
-m1 <- gillnetfitTMB(x,par) # warnings if poor starting values
+m1 <- gillnetfit(x,par)
 m1 
 
+
 ### Comparison -----------------------------------------------------------------
-
-partable(m1)[1:2,2:3] # estimated paras
-tropfits$norm.sca[1:2,] # how do they compare to tropfits?
-
-if(!identical(round(unlist(partable(m1)[1:2,2:3],use.names=F),4),
-              round(as.vector(tropfits$norm.sca[1:2,]),4))) warning("model output not identical")
+partable(m1)[1:2,2:3]     # estimated paras
+tropfits[[x$rtype]][1:2,] # how do they compare to tropfits?
 
 ## B) Selectivity curves #######################################################
 
@@ -58,10 +57,10 @@ if(!identical(round(unlist(partable(m1)[1:2,2:3],use.names=F),4),
 ms <- lapply(rtypes, function(i){
     x$rtype <- i
     par <- defpar(x)
-    gillnetfitTMB(x,par)
+    gillnetfit(x,par)
 })
 names(ms) <- rtypes
-ms <- do.call('c',ms) # equivalent to c(m1,m2,m3,m4)
+ms <- do.call('c',ms)
 ms
 
 # % error in parameters
@@ -75,7 +74,7 @@ bb <- round(sapply(tropfits,function(x)as.vector(x[1:2,])),4)
 x$rtype <- "norm.sca"
 x$distr <- "nbinom"
 par <- defpar(x)
-m2 <- gillnetfitTMB(x,par) # warning is ok if all paras have sd, and max gradient <0.001
+m2 <- gillnetfit(x,par) # warning is ok if all paras have sd, and max gradient <0.001
 m2
 
 partable(m2)[1:2,2:3]

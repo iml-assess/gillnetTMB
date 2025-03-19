@@ -8,13 +8,14 @@
 \usage{
 plotN(x, ...)
 
-\method{plotN}{gillnet}(x, ylab = "Relative abundance index", xlab = "Length")
+\method{plotN}{gillnet}(x, ylab = "Relative abundance index", xlab = "Length", ci = TRUE)
 
 \method{plotN}{gillnet}(
   x,
   ylab = "Relative abundance index",
   xlab = "Length",
-  filllab = "Fit",
+  ci = TRUE,
+  collab = "Fit",
   dodge = 1.8
 )
 }
@@ -24,6 +25,8 @@ plotN(x, ...)
 \item{ylab}{ylab}
 
 \item{xlab}{xlab}
+
+\item{ci}{logical}
 
 \item{x...}{}
 }
