@@ -5,6 +5,7 @@
 .Rprofile
 build/
 Rdata/
+data/
 src/*.o
 src/*.so
 src/*.dll
