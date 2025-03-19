@@ -7,8 +7,8 @@
 ##' @details Predicts selectivity based on knowm parameter values
 ##' @rdname predSel
 ##' @export
-predSel <- function(length,mesh,k1,k2,rtype="norm.loc"){
-    rtype <- match.arg(rtype,c("norm.sca","norm.loc","gamma","lognorm"))
+predSel <- function(length,mesh,k1,k2,rtype="norm.loc",...){
+    rtype <- match.arg(rtype,c("norm.loc","norm.sca","gamma","lognorm"))
     
     switch(rtype, 
            norm.loc = {selfun <- function(length,mesh,k1,k2,...){-(length-k1*mesh)^2/(2*k2^2)}}, # mu=k1, sd = k2 

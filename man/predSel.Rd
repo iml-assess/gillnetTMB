@@ -4,7 +4,7 @@
 \alias{predSel}
 \title{Predict selectivity}
 \usage{
-predSel(length, mesh, k1, k2, rtype = "norm.loc")
+predSel(length, mesh, k1, k2, rtype = "norm.loc", ...)
 }
 \arguments{
 \item{length}{vector}
