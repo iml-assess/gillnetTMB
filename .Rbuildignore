@@ -1,9 +1,11 @@
 ^.*[.]Rproj.*$
 ^\.Rproj\.user$
 ^.Rhistory$
+^.Rprofile$
 ^.*/.Rdata$
 ^data-raw$
 ^build$
 ^.*\.Rproj$
 ^example$
 ^Rdata$
+^data$
