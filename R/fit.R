@@ -70,6 +70,7 @@ defpar <-function(x,plot=FALSE){
 ##' @param x input data (list)
 ##' @param warning logical
 ##' @details Transforms data input, for easy integration in TMB. Lengths are removed for which only zeros were observed across all mesh sizes, years, regions and periods (see Surette).
+##' @importFrom reshape2 dcast
 ##' @rdname defdat
 ##' @examples 
 ##' x <- defdat(data)
