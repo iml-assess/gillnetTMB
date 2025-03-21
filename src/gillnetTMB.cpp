@@ -11,12 +11,11 @@ template<class Type>
   DATA_VECTOR(cpn)
   DATA_INTEGER(rtype)
   DATA_INTEGER(distr)
-  DATA_IVECTOR(group)
-  DATA_IVECTOR(lengthid)
+  DATA_IVECTOR(Nid)
 
   // parameters
   PARAMETER_VECTOR(par)
-  PARAMETER_ARRAY(logN)
+  PARAMETER_VECTOR(logN)
 
   // basics
   int n=cpn.size();
@@ -56,14 +55,12 @@ template<class Type>
 
   // predictions
    vector<Type> logpred(n);
-   int g;
-   int l;
+   int ix;
    int onei=1;
 
    for(int i=0; i<n; i++){
-    g = group(i) - onei;
-    l = lengthid(i) - onei;
-  	logpred(i) = logN(g,l) + logsel(i);
+    ix = Nid(i) - onei;
+  	logpred(i) = logN(ix) + logsel(i);
    }
 
   // likelihood

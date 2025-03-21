@@ -1,6 +1,8 @@
 # Example 3: real data (herring) ###############################################
 # 4R herring data (not as perfect)
 library(gillnetTMB)
+library(ggplot2)
+library(reshape2)
 
 ## 1) data ---------------------------------------------------------------------
 load("Rdata/input.Rdata",verbose = T)

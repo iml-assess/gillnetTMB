@@ -137,7 +137,7 @@ plotRes.gillnetset <- function(x,ylab="Selectivity",xlab="Length",collab="Mesh")
         geom_point()+
         theme(legend.position = "none")+
         labs(x=xlab,y=ylab)+
-        facet_wrap(~fit)
+        facet_grid(year+region+period~fit)
 }
 
 ##' plot observed vs predicted

@@ -3,6 +3,7 @@
 
 library(gillnetTMB)
 library(TropFishR)
+library(ggplot2)
 
 ### A) Data --------------------------------------------------------------------
 # 1) get demo data from TropFish
@@ -22,7 +23,7 @@ p0 <- ggplot(dat,aes(x=length,y=cpn,col=as.factor(mesh)))+geom_line()+facet_wrap
 
 
 ### B) Option 1: average across factor (here year) and then fit-----------------
-dat1 <- ddply(dat,c("length","mesh"),summarise,cpn=round(mean(cpn),0))
+dat1 <- plyr::ddply(dat,c("length","mesh"),plyr::summarise,cpn=round(mean(cpn),0))
 
 x <- list(
     year = rep(1,nrow(dat1)),
@@ -80,8 +81,8 @@ p2S <- plotSel(m2)
 pars <- partable(c(m1,m2))
 pars[pars$par %in% c("par"),]
 
-grid.arrange(p1N,p2N)
-grid.arrange(p1S,p2S)
+gridExtra::grid.arrange(p1N,p2N)
+gridExtra::grid.arrange(p1S,p2S)
 
 
 

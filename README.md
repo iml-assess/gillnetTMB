@@ -50,6 +50,13 @@ plotOP(m)
 2) maximum gradient <0.001 (see fittable)
 3) all parametesr have a standard error (see partable)
 
+# Notes
+
+Advantages over the TropFishR package, using Millar's original gillnet selectivity fitting function (function "gillnetfit"):
+1) Estimation of abundance for various factors (combinations of year-region-period) assuming constant selectivity.
+2) Confidence intervals around the abundance and selectivity estimates are readily provided.
+3) Two error distributions (posibility to explore the negative binomial).
+
 # References
 
 1. Millar, R., 1997. Estimation of gillnet and hook selectivity using log-linear models. ICES J. Mar. Sci. 54, 471–477. https://doi.org/10.1006/jmsc.1996.0196

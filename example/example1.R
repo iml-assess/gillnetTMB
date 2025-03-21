@@ -1,6 +1,7 @@
 # Example 1: Compare Tropfish with gillnetTMB ##################################
 library(gillnetTMB)
 library(TropFishR)
+library(ggplot2)
 
 ## A) Baseline ######################
 

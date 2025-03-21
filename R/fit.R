@@ -47,16 +47,14 @@ defpar <-function(x,plot=FALSE){
     
     if(xx$distr==2) ret$par <- c(ret$par,logtheta=1)
     
-    temp <- aggregate(list(Ninit = xx$cpn), by = xx[c(1,6)], mean)
-    temp$Ninit[temp$Ninit==0] <- min(temp$Ninit[temp$Ninit!=0])
-    ret$logN <- matrix(log(temp[,"Ninit"]),ncol=length(unique(temp$length))) # check if multiple groups if byrow or not
-    dimnames(ret$logN) <- list(group=1:nrow(ret$logN),length=unique(temp$length))
+    temp <- aggregate(list(Ninit = xx$cpn), by = xx["Nid"], mean)
+    ret$logN <- log(temp[,"Ninit"])
 
     check <- gillnetR(ret,xx)
     if (is.na(check) | !is.finite(check)) warning("Default initial parameters will result in undefined likelihood.")
     
     if(plot){
-        df <- data.frame(do.call(cbind,x[1:5]))
+        df <- data.frame(x[1:5])
         df$selectivity <- do.call(predSel,c(x,ret$par))
         p <- ggplot(df,aes(x=length,y=selectivity,col=as.factor(mesh)))+
             geom_line()+
@@ -83,7 +81,10 @@ defdat <-function(x,warning=FALSE){
     x$rtype <- match.arg(x$rtype,rtypes)
     x$distr <- match.arg(x$distr,distrs)
     
-    # Remove lengths for which always zero (idem Surette)
+    # cpn need to be counts
+    if(!all(x$cpn%%1==0)) stop("cpn needs to be a count/integer")
+    
+    # Remove lengths for which always zero (idem Surette; if group/length has only zeros, remove)
     checkzero <- apply(do.call("cbind",x[1:4]),1,paste,collapse=".")
     checkzero <- as.numeric(as.factor(checkzero))
     temp <- aggregate(x$cpn, by = list(checkzero), sum)
@@ -93,23 +94,31 @@ defdat <-function(x,warning=FALSE){
         x[1:6] <- lapply(x[1:6],function(i)i[!ix])
     }
     
-    # sort
-    s <- order(x[[1]], x[[2]],x[[3]],x[[5]],x[[4]])
-    x[c(1:5)] <- lapply(x[c(1:5)],function(x) x[s])
-
     # Groups
     group <- apply(do.call("cbind",x[1:3]),1,paste,collapse=".")
     group <- as.numeric(as.factor(group))
     
+    # pad with zeros (if group/length has value for one mesh, it needs to have value for all mesh)
+    xx <- data.frame(c(x,list(group=group)))
+    xx <- do.call("rbind",by(xx, group,  function(i){
+        ii <- dcast(i,length~mesh,value.var = "cpn",fill = 0)
+        ii <- melt(ii,id.vars = c("length"),variable.name = "mesh",value.name = "cpn")
+        ii$mesh <- as.character(ii$mesh)
+        cbind(ii,group=unique(i$group))
+    }))
+    if(warning & nrow(xx)>length(x$cpn)) print("zero padding for missing mesh in same length-group category")
+    
+    # sort
+    xx <- xx[order(xx$group,xx$mesh,xx$length),]
+
     # Transform input data for cpp
-    ret <- list(length=x$length,
-                 mesh=x$mesh,
-                 cpn=x$cpn,
+    ret <- list(length=as.numeric(xx$length),
+                 mesh=as.numeric(xx$mesh),
+                 cpn=as.numeric(xx$cpn),
                  rtype=which(rtypes==x$rtype),
                  distr=which(distrs==x$distr),
-                 group=group,
-                 lengthid=as.numeric(as.factor(x$length)))
-    
+                 Nid=as.numeric(as.factor(paste(xx$group,xx$length))))
+    attr(ret,"group") <- data.frame(group=xx$group,data.frame(x[1:3]))
     return(ret)
 }
 
@@ -148,7 +157,7 @@ gillnetfit <- function(x,par){
                 df = length(opt$par), 
                 AIC = 2*length(opt$par)-2*opt$objective, 
                 sdrep = sdr,  
-                data = x, 
+                data = xx, 
                 para = as.list(sdr,"Est"),
                 parasd = as.list(sdr,"Std"),
                 opt = opt, 
@@ -182,9 +191,7 @@ gillnetR <- function(par, x) {
     logpred <- numeric(n)
     
     for(i in 1:n){
-        g <- group[i]
-        l <- lengthid[i]
-        logpred[i] <- logN[g,l]+logsel[i]
+        logpred[i] <- logN[Nid[i]]+logsel[i]    
     }
     pred <- exp(logpred)
     
