@@ -2,7 +2,6 @@
 # -> averaging npue across a factor (year/region/period) VERSUS using factor-specific model
 
 library(gillnetTMB)
-library(TropFishR)
 library(ggplot2)
 
 ### A) Data --------------------------------------------------------------------

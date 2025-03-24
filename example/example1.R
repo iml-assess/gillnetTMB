@@ -1,6 +1,5 @@
 # Example 1: Compare Tropfish with gillnetTMB ##################################
 library(gillnetTMB)
-library(TropFishR)
 library(ggplot2)
 
 ## A) Baseline ######################
@@ -40,10 +39,10 @@ x <- list(
 )
 
 # parameters
-par <- defpar(x)
+par <- gillnetTMB::defpar(x)
 
 # fit model
-m1 <- gillnetfit(x,par)
+m1 <- gillnetTMB::gillnetfit(x,par)
 m1 
 
 

@@ -13,3 +13,4 @@ Imports: TMB, ggplot2, viridis, reshape2
 Encoding: UTF-8
 RoxygenNote: 7.2.3
 Depends: TMB, RcppEigen, R (>= 2.10)
+LazyData: true
