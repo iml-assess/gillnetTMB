@@ -74,6 +74,7 @@ defpar <-function(x,plot=FALSE){
 ##' @rdname defdat
 ##' @examples 
 ##' x <- defdat(data)
+##' @export
 defdat <-function(x,warning=FALSE){
     
     if(missing(x)) stop("argument 'x' is missing, with no default")
