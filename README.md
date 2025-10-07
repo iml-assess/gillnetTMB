@@ -1,12 +1,12 @@
 # GillnetTMB
 
-Model to estimate gear selectivity and population abundance by factor (year/period/region). Selectivity is assumed constant over space and time.
+Model to estimate gear selectivity and population abundance by factor (year/period/region/stock or component). Selectivity is assumed constant over space and time.
 
 The model follows;
 
 logPred(mlf) = logN(lf) + logSel(l) (based on Surette et al. 2016),
 
-where logPred(mlg) is the predicted mean for mesh size m and fish length l, for factor f. logN is the estimated population abundance corrected for selectivity, on a log scale. logSel is time time- and space invariant gear selectivity at length. The package has four types of selectivity curves (see Millar 1997 and 1999). Two count distributions can be used; the Poisson and the negative binomial. Note that each mesh size is assumed to have equal power (i.e., their relative fishing power  is one).
+where logPred(mlg) is the predicted mean for mesh size m and fish length l, for factor f. logN is the estimated relative population abundance corrected for selectivity, on a log scale. logSel is time time- and space invariant gear selectivity at length. The package has four types of selectivity curves (see Millar 1997 and 1999). Two count distributions can be used; the Poisson and the negative binomial. Note that each mesh size is assumed to have equal power (i.e., their relative fishing power  is one).
 
 The model is based on RTMB. 
 
