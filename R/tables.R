@@ -185,9 +185,24 @@ selmaxtable <-function(x, ...){
 ##' @method selmaxtable gillnet
 ##' @export
 selmaxtable.gillnet <- function(x){
-    ret <- seltable(x)
-    ret <- merge(aggregate(estimate ~ mesh, max, data = ret), ret[,c("length","mesh","estimate")])
-    return(ret)
+    
+    pars <- partable(x)
+    mesh <- unique(x$data$mesh)
+    k1 <- pars[1,2]
+    k2 <- pars[2,2]
+    rtype <- c("norm.loc","norm.sca","gamma","lognorm")[x$data$rtype]
+    m1 <- min(mesh)
+    
+    # equations solved for length with y (selectivity) = 1
+    switch(rtype, 
+           norm.loc = {selfun <- function(mesh,k1,...){k1*mesh}}, 
+           norm.sca = {selfun <- function(mesh,k1,...){k1*mesh}}, 
+           gamma = {selfun <- function(mesh,k1,k2){(k1-1)*k2*mesh}}, 
+           lognorm = {selfun <- function(mesh,k1,k2){mesh/m1*exp(k1-k2^2)}}
+    )
+    peak <- selfun(mesh,k1,k2)
+    df <- data.frame(mesh=mesh,peak=peak)
+    return(df)
 }
 
 ##' @rdname selmaxtable
@@ -198,9 +213,4 @@ selmaxtable.gillnetset <- function(x){
     ret <- combine.df(ret)
     return(ret)
 }
-
-
-
-
-
 

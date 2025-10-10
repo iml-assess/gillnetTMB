@@ -104,5 +104,36 @@ residuals.gillnetset<-function(object){
 c.gillnet<-function(...){
     ret<-list(...)
     class(ret)<-"gillnetset"
-    ret
+    return(ret)
 }
+
+##' Predict selectivity
+##' @method predict gillnet
+##' @param object gillnet fit object
+##' @param  ... 
+##' @details ...
+##' @export
+predict.gillnet<-function(object,length=seq(min(object$data$length), max(object$data$length), by = 0.01),...){
+    rtypes <- c("norm.loc","norm.sca","gamma","lognorm")
+    k1 <- object$para$par[1]
+    k2 <- object$para$par[2]
+    r <-  rtypes[object$data$rtype]   
+    
+    mesh <- unique(object$data$mesh)
+    ret <- expand.grid(length=length,mesh=mesh)
+    ret$y <- predSel(ret$length,ret$mesh,k1,k2,r)
+    return(ret)
+}
+
+##' Predict selectivity
+##' @method predict gillnetset
+##' @param object gillnetset object
+##' @param  ... 
+##' @details ...
+##' @export
+predict.gillnetset <- function(object,...){
+    ret <- lapply(object,function(x) predict(x,...))
+    ret <- combine.df(ret)
+    return(ret)
+}
+

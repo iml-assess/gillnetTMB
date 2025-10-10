@@ -10,7 +10,7 @@ plotRes(x, ...)
 
 \method{plotRes}{gillnet}(x, xlab = "Length", ylab = "Mesh size")
 
-\method{plotRes}{gillnet}(x, ylab = "Selectivity", xlab = "Length", collab = "Mesh")
+\method{plotRes}{gillnetset}(x, ylab = "Selectivity", xlab = "Length", collab = "Mesh")
 }
 \arguments{
 \item{...}{extra arguments not currently used}

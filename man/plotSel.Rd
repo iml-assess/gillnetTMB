@@ -16,7 +16,7 @@ plotSel(x, ...)
   meshlabs = NULL
 )
 
-\method{plotSel}{gillnet}(
+\method{plotSel}{gillnetset}(
   x,
   ylab = "Selectivity",
   xlab = "Length",

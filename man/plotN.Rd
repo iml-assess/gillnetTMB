@@ -10,7 +10,7 @@ plotN(x, ...)
 
 \method{plotN}{gillnet}(x, ylab = "Relative abundance index", xlab = "Length", ci = TRUE)
 
-\method{plotN}{gillnet}(
+\method{plotN}{gillnetset}(
   x,
   ylab = "Relative abundance index",
   xlab = "Length",

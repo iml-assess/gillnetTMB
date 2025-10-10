@@ -92,6 +92,7 @@ plotSel(m1)
 plotN(m1)
 plotRes(m1)
 plotOP(m1)
+plotOP(m1,facet = T)
 
 ### multiple models  -----------------------------------------------------------
 fittable(ms)
@@ -106,5 +107,11 @@ plotN(ms)
 plotRes(ms)
 plotOP(ms)
 
+## E) Predictions ########################################################
+
+new <- predict(ms,length=seq(40,90,0.01))
+ggplot(new,aes(x=length,y=y,col=fit))+
+    geom_line()+
+    facet_wrap(~mesh)
 
 

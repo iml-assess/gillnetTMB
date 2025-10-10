@@ -8,18 +8,44 @@
 \usage{
 plotOP(x, ...)
 
-\method{plotOP}{gillnet}(x, log = FALSE, ...)
+\method{plotOP}{gillnet}(
+  x,
+  log = FALSE,
+  xlab = "Observed",
+  ylab = "Predicted",
+  collab = "Mesh",
+  facet = FALSE,
+  meshlabs = NULL,
+  ...
+)
 
-\method{plotOP}{gillnet}(x, log = FALSE, ...)
+\method{plotOP}{gillnetset}(
+  x,
+  log = FALSE,
+  xlab = "Observed",
+  ylab = "Predicted",
+  collab = "Mesh",
+  ...
+)
 }
 \arguments{
+\item{x}{gillnetset object}
+
 \item{...}{extra arguments not currently used}
 
-\item{x...}{}
+\item{log}{logical}
+
+\item{xlab}{xlab}
 
 \item{ylab}{ylab}
 
-\item{xlab}{xlab}
+\item{facet}{plot mesh as facet}
+
+\item{meshlabs}{labels for mesh facets (if facet=TRUE)}
+
+\item{x...}{}
+
+\item{collabl}{color lab}
 }
 \description{
 plot observed vs predicted
